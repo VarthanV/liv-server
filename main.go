@@ -7,7 +7,9 @@ import (
 
 func initServer() {
 	r := gin.Default()
+	socketRouter := gin.Default()
 	controller := controllers.NewController()
+	go controller.InitSocket(socketRouter)
 	controller.InitRoutes(r)
 }
 

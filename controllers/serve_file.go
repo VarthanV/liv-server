@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -40,6 +41,17 @@ func (c *Controller) ServeFile(ctx *gin.Context) {
 			"DirectoryName": path,
 			"Files":         files,
 		})
+		return
+	}
+
+	if filepath.Ext(fileInfo.Name()) == ".html" {
+		html, err := c.fileService.GetHTML(absolutePath)
+		if err != nil {
+			logrus.Error("error in getting html ", err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.Data(http.StatusOK, "text/html", []byte(html))
 		return
 	}
 	ctx.File(absolutePath)
