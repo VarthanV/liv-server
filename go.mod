@@ -3,6 +3,7 @@ module github.com/VarthanV/liv-server
 go 1.23.4
 
 require (
+	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gin-gonic/gin v1.10.1
 	github.com/sirupsen/logrus v1.9.3
 )

@@ -1,13 +1,44 @@
 package fileservice
 
 import (
+	"context"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/sirupsen/logrus"
 )
+
+func (f *Service) InitWatcher(ctx context.Context) {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		logrus.Error("error in creating watcher ", err)
+		return
+	}
+	defer watcher.Close()
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				logrus.Info("context done")
+				return
+			case event, ok := <-watcher.Events:
+				if !ok {
+					logrus.Info("watcher events channel closed")
+					return
+				}
+				logrus.Info("event: ", event)
+				if event.Op&fsnotify.Write == fsnotify.Write {
+					logrus.Info("modified file: ", event.Name)
+				}
+			}
+
+		}
+	}()
+}
 
 // List lists all the files and subdirectories in the given path
 func (f *Service) List(rootPath string, requestPath string) ([]FileItem, error) {
