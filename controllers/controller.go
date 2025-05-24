@@ -1,21 +1,29 @@
 package controllers
 
 import (
+	"fmt"
+
+	"github.com/VarthanV/liv-server/fileservice"
 	"github.com/gin-gonic/gin"
 )
 
-type Controller struct{}
+const (
+	host = "127.0.0.1"
+	port = 8060
+)
+
+type Controller struct {
+	fileService *fileservice.Service
+}
 
 func NewController() *Controller {
-	return &Controller{}
+	return &Controller{
+		fileService: fileservice.NewFileService(),
+	}
 }
 
 func (c *Controller) InitRoutes(r *gin.Engine) {
-	r.GET("", func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{
-			"message": "hello world",
-		})
-	})
-	r.GET("/:path", c.ServeFile)
-	r.Run("127.0.0.1:8060")
+	r.LoadHTMLGlob("templates/*")
+	r.GET("/*path", c.ServeFile)
+	r.Run(fmt.Sprintf("%s:%d", host, port))
 }

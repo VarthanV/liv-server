@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index of {{.DirectoryName}}</title>
+</head>
+<body>
+    <h1> Index of {{.DirectoryName}}</h1>
+
+    <ul>
+        {{range .Files}}
+        <li>
+            {{if .IsDir}}
+            📁 <strong> <a href="{{.RootDir}}/{{.Path}}">{{.Path}}</a> <strong>
+
+            {{else}}
+            <a href="{{.RootDir}}/{{.Path}}">{{.Path}}</a>
+
+            {{end}}
+        </li>
+        {{end}}
+    
+</body>
+</html>

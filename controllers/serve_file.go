@@ -19,29 +19,28 @@ func (c *Controller) ServeFile(ctx *gin.Context) {
 		})
 		return
 	}
-	absolutePath := fmt.Sprintf("%s/%s", pwd, path)
+
+	absolutePath := fmt.Sprintf("%s%s", pwd, path)
 	logrus.Info("file path ", absolutePath)
-	fileInfo, err := c.canServe(absolutePath)
+	fileInfo, err := os.Stat(absolutePath)
 	if err != nil {
 		logrus.Error("error in checking if file can be served ", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.Header("File-Name", fileInfo.Name())
-	ctx.File(absolutePath)
-}
-
-func (c *Controller) canServe(path string) (os.FileInfo, error) {
-	fileInfo, err := os.Stat(path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, ErrFileDoesNotExist
-		}
-		return nil, err
-	}
 	if fileInfo.IsDir() {
-		return nil, ErrPathIsADirectory
+		files, err := c.fileService.List(absolutePath, path)
+		if err != nil {
+			logrus.Error("error in listing files ", err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.HTML(http.StatusOK, "list_files.html", gin.H{
+			"DirectoryName": path,
+			"Files":         files,
+		})
+		return
 	}
-	return fileInfo, nil
+	ctx.File(absolutePath)
 }
