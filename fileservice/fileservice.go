@@ -32,7 +32,10 @@ func (f *Service) InitWatcher(ctx context.Context, conn *websocket.Conn) {
 			select {
 			case <-ctx.Done():
 				logrus.Info("context done")
-				watcher.Close()
+				err = watcher.Close()
+				if err != nil {
+					logrus.Error("error in closing watcher ", err)
+				}
 				return
 			case event, ok := <-watcher.Events:
 				if !ok {
