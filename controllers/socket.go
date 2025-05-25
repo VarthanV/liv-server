@@ -1,11 +1,11 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/sirupsen/logrus"
 )
 
 var upgrader = websocket.Upgrader{
@@ -19,7 +19,7 @@ var upgrader = websocket.Upgrader{
 func (c *Controller) HandleSocket(ctx *gin.Context) {
 	conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
-		fmt.Println("WebSocket upgrade error:", err)
+		logrus.Error("WebSocket upgrade error:", err)
 		return
 	}
 	defer conn.Close()
@@ -27,14 +27,14 @@ func (c *Controller) HandleSocket(ctx *gin.Context) {
 	for {
 		messageType, message, err := conn.ReadMessage()
 		if err != nil {
-			fmt.Println("Read error:", err)
+			logrus.Info("Read error:", err)
 			break
 		}
-		fmt.Printf("Received: %s\n", message)
+		logrus.Infof("Received: %s\n", message)
 
 		// Echo back the message
 		if err := conn.WriteMessage(messageType, message); err != nil {
-			fmt.Println("Write error:", err)
+			logrus.Info("Write error:", err)
 			break
 		}
 		c.fileService.InitWatcher(ctx, conn)
